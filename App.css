@@ -1,0 +1,193 @@
+/* App.css - Engineered Dashboard Layout */
+
+/* Global Reset for Boxy Aesthetic */
+* {
+  box-sizing: border-box;
+  border-radius: 0 !important; /* Strict enforcement: No rounded corners */
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent body scroll, layout handles it */
+}
+
+/* Main Dashboard Container */
+.app-container {
+  display: flex;
+  flex-direction: row; /* Horizontal Layout */
+  height: 100vh;
+  width: 100vw;
+  background-color: #f2f4f7; /* Slightly darker main background to make white sidebar pop */
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #333;
+}
+
+/* --- LEFT SIDEBAR --- */
+.sidebar {
+  width: 300px; /* Slightly narrower to give more room to main content */
+  min-width: 300px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #d1d5db;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto; /* Scrollable controls */
+}
+
+/* --- MOODLE-STYLE NAVIGATION BLOCK --- */
+/* Matches the "Điều hướng" block in the reference image */
+.nav-block {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 12px 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.nav-header {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Tree Structure */
+.nav-tree {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item-parent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px;
+  font-size: 0.9rem;
+  color: #444;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+.nav-item-parent:hover {
+  background-color: #f1f5f9;
+}
+
+.nav-tree-sub {
+  list-style: none;
+  padding-left: 12px; /* Indentation for hierarchy */
+  margin: 0;
+}
+
+/* Navigation Links (Replica of the blue text in reference) */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 8px 6px;
+  font-size: 0.85rem;
+  color: #0f6cb0; /* Specific Link Blue from LMS styles */
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+  border-left: 3px solid transparent; /* Reserve space for active border */
+}
+
+.nav-link:hover {
+  text-decoration: none;
+  background-color: #f0f4f8;
+  color: #0a4b7c;
+}
+
+/* Active State - Bold and Highlighted */
+.nav-link.active {
+  font-weight: 700;
+  color: #000; /* Active item becomes black/bold */
+  background-color: #e9ecef;
+  border-left: 3px solid #0f6cb0; /* Accent bar */
+  padding-left: 5px; /* Adjust for border */
+}
+
+/* Icons styling */
+.nav-icon-sm {
+  width: 14px;
+  height: 14px;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.nav-link-icon {
+  width: 15px;
+  height: 15px;
+  color: #0f6cb0; /* Icons match link color */
+}
+
+.nav-link.active .nav-link-icon {
+  color: #000;
+}
+
+
+/* --- CONTROLS SECTION (Data Upload etc) --- */
+/* Style these as a separate block to keep the Nav clean */
+.controls-block {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 12px;
+}
+
+.controls-header {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #666;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+/* Component Overrides for Controls */
+.sidebar select,
+.sidebar input[type="text"],
+.sidebar input[type="file"] {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #ccc !important;
+  padding: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+/* Tips Box */
+.tips-container {
+  margin-top: auto;
+  padding: 12px;
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  font-size: 0.75rem;
+  color: #495057;
+}
+
+/* --- RIGHT MAIN CONTENT --- */
+.main-content {
+  flex: 1;
+  background-color: #ffffff;
+  padding: 0; /* Reset padding to allow full bleed */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* If the direct child is a chart display or project info, give it some padding container */
+/* But EmbedViewer handles its own layout */
+.main-content > div {
+  height: 100%;
+}
