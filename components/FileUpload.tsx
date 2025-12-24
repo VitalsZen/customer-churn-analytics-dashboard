@@ -6,10 +6,12 @@ interface FileUploadProps {
   onDataLoaded: (data: DataRow[], columns: string[]) => void;
 }
 
+// Component tải file CSV và parse dữ liệu đầu vào
 export const FileUpload: React.FC<FileUploadProps> = ({ onDataLoaded }) => {
   const [fileName, setFileName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
+  // Kiểm tra và xử lý file CSV được tải lên
   const processFile = (file: File) => {
     if (!file.name.endsWith('.csv')) {
       setError('Vui lòng chọn file CSV.');
@@ -34,12 +36,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataLoaded }) => {
 
         onDataLoaded(data, fields);
       },
+      // Xử lý lỗi khi parse CSV
       error: (err) => {
         setError(err.message);
       }
     });
   };
 
+  // Bắt sự kiện khi người dùng chọn file
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) processFile(file);

@@ -7,20 +7,21 @@ interface EmbedViewerProps {
   type: 'iframe' | 'placeholder';
 }
 
+// Component hiển thị iframe embed hoặc placeholder khi chưa có dữ liệu
 export const EmbedViewer: React.FC<EmbedViewerProps> = ({ src, title, type }) => {
   return (
-    // Container chính: Chiều rộng 100%, chiều cao 85vh (cao gần hết màn hình), bo góc, đổ bóng nhẹ
+    // Container hiển thị nội dung embed
     <div className="w-1000 h-[120vh] bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         {type === 'iframe' && src ? (
           <iframe
             src={src}
             title={title}
             className="w-full h-full border-0"
-            // Các quyền sandbox để Flourish hoạt động mượt mà
+            // Cấu hình sandbox để iframe hoạt động đầy đủ tính năng
             sandbox="allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
           />
         ) : (
-          // Phần hiển thị khi chưa có dữ liệu (Placeholder)
+          // Hiển thị placeholder khi chưa có dữ liệu biểu đồ
           <div className="w-900 h-auto flex flex-col items-center justify-center text-slate-400 bg-slate-50">
             <BarChart className="w-16 h-16 mb-4 opacity-20" />
             <h3 className="text-xl font-bold uppercase mb-2 text-slate-500">{title}</h3>

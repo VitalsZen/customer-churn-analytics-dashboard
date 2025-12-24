@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChartConfiguration, ChartType, AggregationMode, CHART_TYPES, AGGREGATION_TYPES, DataRow } from '../types';
-import { Settings2, ArrowRight, BarChartHorizontal, Calculator, PieChart, ScatterChart, BarChart2, Activity } from 'lucide-react';
+import { Settings2, ArrowRight, Calculator } from 'lucide-react';
 
 interface ChartConfigProps {
   columns: string[];
@@ -9,192 +9,213 @@ interface ChartConfigProps {
   disabled: boolean;
 }
 
+// Component cấu hình biểu đồ dựa trên dữ liệu người dùng chọn
 export const ChartConfig: React.FC<ChartConfigProps> = ({ columns, sampleData, onConfigSubmit, disabled }) => {
-  const [chartType, setChartType] = useState<ChartType>('bar');
+  const [chartType, setChartType] = useState<ChartType>('stackedBar');
   const [xAxisKey, setXAxisKey] = useState<string>('');
   const [yAxisKey, setYAxisKey] = useState<string>('');
   const [aggregation, setAggregation] = useState<AggregationMode>('count');
 
-  // Analyze column types
-  const columnInfo = useMemo(() => {
+  // Xác định kiểu dữ liệu của từng cột từ dữ liệu mẫu
+  const colTypes = useMemo(() => {
     if (!sampleData || sampleData.length === 0) return { numeric: [], categorical: [] };
-    const firstRow = sampleData[0];
-    
+    const row = sampleData[0];
     const numeric: string[] = [];
     const categorical: string[] = [];
-
     columns.forEach(col => {
-      const val = firstRow[col];
-      // Basic heuristic: check if value is a number
+      if (col === 'CustomerID') return;
+      const val = row[col];
       if (typeof val === 'number') numeric.push(col);
       else categorical.push(col);
     });
-
     return { numeric, categorical };
   }, [columns, sampleData]);
 
-  // Set defaults
+  // Tự động gán trục mặc định theo loại biểu đồ
   useEffect(() => {
-    if (columns.length > 0 && !xAxisKey) {
-      setXAxisKey(columns[0]);
-      setYAxisKey(columnInfo.numeric[0] || columns[0]);
+    if (disabled) return;
+    switch (chartType) {
+      case 'scatter':
+        setXAxisKey(colTypes.numeric[0] || columns[0]);
+        setYAxisKey(colTypes.numeric[1] || columns[1]);
+        break;
+      case 'radar':
+        setXAxisKey('');
+        setYAxisKey('');
+        break;
+      default:
+        setXAxisKey(colTypes.categorical[0] || columns[0]);
+        setYAxisKey('');
+        setAggregation('count');
+        break;
     }
-  }, [columns, columnInfo, xAxisKey]);
+  }, [chartType, disabled, columns, colTypes]);
 
-  // Auto-set aggregation
-  useEffect(() => {
-    if (['scatter', 'stackedBar', 'radar'].includes(chartType)) return;
-
-    if (columnInfo.numeric.includes(yAxisKey)) {
-      setAggregation('avg');
-    } else {
-      setAggregation('count');
-    }
-  }, [yAxisKey, columnInfo.numeric, chartType]);
-
+  // Gửi cấu hình biểu đồ hiện tại lên component cha
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onConfigSubmit({
-      type: chartType,
-      xAxisKey,
-      yAxisKey,
-      aggregation,
-    });
+    onConfigSubmit({ type: chartType, xAxisKey, yAxisKey, aggregation });
   };
 
-  const isScatter = chartType === 'scatter';
-  const isRadar = chartType === 'radar';
-  const isStacked = chartType === 'stackedBar';
-  const showYAxis = !isRadar && !isStacked;
-  const showAggregation = !isScatter && !isRadar && !isStacked;
+  // Render danh sách cột cho select, phân nhóm theo kiểu dữ liệu
+  const renderColumnOptions = () => (
+    <>
+      <optgroup label="Text">
+        {colTypes.categorical.map(c => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </optgroup>
+      <optgroup label="Numeric">
+        {colTypes.numeric.map(c => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </optgroup>
+    </>
+  );
 
-  if (disabled) {
-    return (
-      <div className="opacity-50 pointer-events-none grayscale p-4 border border-slate-200 rounded-xl bg-gray-50 text-center">
-        <p className="text-slate-500 text-xs">Vui lòng tải dữ liệu để cấu hình</p>
+  // Hiển thị tùy chọn phép tính khi người dùng chọn cột giá trị
+  const renderAggregationOptions = () => (
+    yAxisKey && (
+      <div className="p-2 bg-slate-50 rounded border border-slate-200 animate-in fade-in">
+        <div className="flex items-center gap-1 mb-2">
+          <Calculator className="w-3 h-3 text-slate-500" />
+          <span className="text-[10px] font-bold text-slate-600 uppercase">Phép tính</span>
+        </div>
+        <div className="flex gap-4">
+          {AGGREGATION_TYPES.filter(a => a.value !== 'count').map(agg => (
+            <label key={agg.value} className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="agg"
+                value={agg.value}
+                checked={aggregation === agg.value}
+                onChange={() => setAggregation(agg.value as AggregationMode)}
+                className="w-3 h-3 text-blue-600"
+              />
+              <span className="text-xs text-slate-700">{agg.label}</span>
+            </label>
+          ))}
+        </div>
       </div>
-    );
-  }
+    )
+  );
+
+  // Chặn thao tác khi chưa tải dữ liệu CSV
+  if (disabled) return <div className="text-center text-xs text-slate-500">Vui lòng tải file CSV</div>;
+
+  // Render các input cấu hình tương ứng với từng loại biểu đồ
+  const renderInputs = () => {
+    switch (chartType) {
+      case 'scatter':
+        return (
+          <div className="grid grid-cols-2 gap-3 animate-in fade-in">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase">Trục X</label>
+              <select value={xAxisKey} onChange={e => setXAxisKey(e.target.value)} className="w-full text-xs p-2 border rounded">
+                {renderColumnOptions()}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase">Trục Y</label>
+              <select value={yAxisKey} onChange={e => setYAxisKey(e.target.value)} className="w-full text-xs p-2 border rounded">
+                {renderColumnOptions()}
+              </select>
+            </div>
+            <p className="col-span-2 text-[10px] text-slate-500 italic">
+              * Scatter hiển thị dữ liệu thô để xem phân bố.
+            </p>
+          </div>
+        );
+
+      case 'radar':
+        return (
+          <div className="p-3 bg-blue-50 text-blue-800 rounded text-xs border border-blue-100">
+            <strong>Tự động:</strong> So sánh trung bình các chỉ số giữa nhóm Rời bỏ và Ở lại.
+          </div>
+        );
+
+      case 'stackedBar':
+        return (
+          <div className="space-y-3 animate-in fade-in">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase">Nhóm theo (Category)</label>
+              <select value={xAxisKey} onChange={e => setXAxisKey(e.target.value)} className="w-full text-xs p-2 border rounded">
+                {renderColumnOptions()}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase">Giá trị phân tích (Tùy chọn)</label>
+              <select value={yAxisKey} onChange={e => setYAxisKey(e.target.value)} className="w-full text-xs p-2 border rounded">
+                <option value="">(Mặc định: Đếm số lượng khách hàng)</option>
+                {renderColumnOptions()}
+              </select>
+            </div>
+
+            {renderAggregationOptions()}
+
+            <div className="p-2 bg-slate-50 text-slate-600 rounded text-[11px] border border-slate-200">
+              Biểu đồ sẽ phân tách dữ liệu thành 2 phần: <b>Rời bỏ</b> và <b>Ở lại</b>.
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="space-y-3 animate-in fade-in">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase">Trục X / Nhóm</label>
+              <select value={xAxisKey} onChange={e => setXAxisKey(e.target.value)} className="w-full text-xs p-2 border rounded">
+                {renderColumnOptions()}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase">Trục Y / Giá trị</label>
+              <select value={yAxisKey} onChange={e => setYAxisKey(e.target.value)} className="w-full text-xs p-2 border rounded">
+                <option value="">(Chỉ đếm số dòng - Count)</option>
+                {renderColumnOptions()}
+              </select>
+            </div>
+            {renderAggregationOptions()}
+          </div>
+        );
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-sm font-bold text-slate-800 uppercase">2. Cấu hình Trực quan</h2>
+        <h2 className="text-sm font-bold text-slate-800 uppercase">2. Cấu hình Biểu đồ</h2>
         <Settings2 className="w-4 h-4 text-slate-400" />
       </div>
 
-      <div className="space-y-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        
-        {/* Chart Type Selection */}
-        <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-500 uppercase">Loại biểu đồ</label>
-          <div className="grid grid-cols-2 gap-2">
-            {CHART_TYPES.map((type) => (
-              <button
-                key={type.value}
-                type="button"
-                onClick={() => setChartType(type.value)}
-                className={`
-                  px-2 py-2 text-xs rounded border transition-all text-left flex items-center gap-2
-                  ${chartType === type.value 
-                    ? 'bg-blue-50 border-blue-500 text-blue-700 font-medium ring-1 ring-blue-500' 
-                    : 'border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}
-                `}
-              >
-                {type.value === 'horizontalBar' && <BarChartHorizontal className="w-3 h-3 flex-shrink-0" />}
-                {type.value === 'bar' && <BarChart2 className="w-3 h-3 flex-shrink-0" />}
-                {type.value === 'doughnut' && <PieChart className="w-3 h-3 flex-shrink-0" />}
-                {type.value === 'scatter' && <ScatterChart className="w-3 h-3 flex-shrink-0" />}
-                {type.value === 'radar' && <Activity className="w-3 h-3 flex-shrink-0" />}
-                {/* Simplified labels for space */}
-                <span className="truncate">{type.label.split('(')[0]}</span>
-              </button>
-            ))}
-          </div>
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div className="grid grid-cols-2 gap-2">
+          {CHART_TYPES.map(type => (
+            <button
+              key={type.value}
+              type="button"
+              onClick={() => setChartType(type.value)}
+              className={`px-2 py-2 text-xs rounded border transition-all text-left flex items-center gap-2 truncate ${
+                chartType === type.value
+                  ? 'bg-blue-50 border-blue-500 text-blue-700 font-medium ring-1 ring-blue-500'
+                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {type.label}
+            </button>
+          ))}
         </div>
 
-        {!isRadar && (
-          <div className="flex flex-col gap-3">
-            {/* X-Axis / Group By */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                {isScatter ? 'Trục X (Số)' : 'Nhóm theo (Category)'}
-              </label>
-              <select
-                value={xAxisKey}
-                onChange={(e) => setXAxisKey(e.target.value)}
-                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
-              >
-                {columns.map((col) => (
-                  <option key={col} value={col}>{col}</option>
-                ))}
-              </select>
-            </div>
+        <hr className="border-slate-100" />
 
-            {/* Y-Axis (Conditional) */}
-            {showYAxis && (
-              <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                  {isScatter ? 'Trục Y (Số)' : 'Giá trị phân tích'}
-                </label>
-                <select
-                  value={yAxisKey}
-                  onChange={(e) => setYAxisKey(e.target.value)}
-                  className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs focus:ring-1 focus:ring-blue-500"
-                >
-                  {!isScatter && <option value="">(Chỉ đếm số lượng)</option>}
-                  {columns.map((col) => (
-                    <option key={col} value={col}>
-                      {col} {columnInfo.numeric.includes(col) ? '(123)' : '(ABC)'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
-        )}
-
-        {isRadar && (
-          <div className="p-3 bg-blue-50 rounded text-xs text-blue-700 border border-blue-200">
-             <p><strong>Tự động:</strong> Biểu đồ Radar sẽ so sánh các chỉ số trung bình giữa nhóm khách hàng Rời bỏ (Churn) và Ở lại.</p>
-          </div>
-        )}
-
-        {/* Aggregation Mode */}
-        {showAggregation && (
-          <div className="p-3 bg-slate-50 rounded border border-slate-200">
-            <div className="flex items-center gap-1 mb-2 text-slate-700">
-              <Calculator className="w-3 h-3" />
-              <span className="text-xs font-bold">Phép toán</span>
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              {AGGREGATION_TYPES.map(agg => (
-                <label key={agg.value} className={`flex items-center gap-2 cursor-pointer ${agg.value !== 'count' && !columnInfo.numeric.includes(yAxisKey) ? 'opacity-50' : ''}`}>
-                  <input 
-                    type="radio" 
-                    name="agg" 
-                    value={agg.value}
-                    checked={aggregation === agg.value} 
-                    onChange={() => setAggregation(agg.value as AggregationMode)}
-                    disabled={agg.value !== 'count' && !columnInfo.numeric.includes(yAxisKey)}
-                    className="text-blue-600 focus:ring-blue-500 h-3 w-3"
-                  />
-                  <span className="text-xs text-slate-600">
-                    {agg.value === 'count' ? 'Đếm dòng (Count)' : agg.value === 'sum' ? 'Tổng giá trị (Sum)' : 'Trung bình (Avg)'}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
+        {renderInputs()}
 
         <button
           type="submit"
-          className="w-full flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 text-white py-3 rounded font-bold uppercase text-xs transition-all shadow-md active:scale-[0.98]"
+          className="w-full flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 text-white py-2.5 rounded font-bold uppercase text-xs shadow-sm mt-2"
         >
-          Vẽ biểu đồ
-          <ArrowRight className="w-3 h-3" />
+          Vẽ biểu đồ <ArrowRight className="w-3 h-3" />
         </button>
       </div>
     </form>

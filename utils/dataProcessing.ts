@@ -1,35 +1,42 @@
 import _ from 'lodash';
 import { DataRow, AggregationMode } from '../types';
 
-// Standard aggregation for Bar/Line/Doughnut
+// Tìm cột biểu diễn trạng thái churn trong dữ liệu
+const findChurnKey = (row: DataRow): string | undefined => {
+  return Object.keys(row).find(k =>
+    ['churn', 'exited', 'target'].includes(k.toLowerCase())
+  );
+};
+
+// Xử lý dữ liệu tổng hợp cho các biểu đồ dạng nhóm
 export const processAggregatedData = (
   data: DataRow[], 
   groupByColumn: string, 
   valueColumn: string, 
   mode: AggregationMode
 ) => {
-  if (!data.length) return { labels: [], data: [] };
+  if (!data.length || !groupByColumn) return { labels: [], data: [] };
 
-  // 1. Group by X-Axis
-  const grouped = _.groupBy(data, groupByColumn);
+  const grouped = _.groupBy(data, row => String(row[groupByColumn]));
 
-  // 2. Aggregate
   const processed = Object.keys(grouped).map(category => {
     const groupRows = grouped[category];
     let value = 0;
 
-    if (mode === 'count' || !valueColumn) {
+    if (!valueColumn || mode === 'count') {
       value = groupRows.length;
-    } else if (mode === 'avg') {
-      value = _.meanBy(groupRows, (r) => Number(r[valueColumn]) || 0);
-    } else if (mode === 'sum') {
-       value = _.sumBy(groupRows, (r) => Number(r[valueColumn]) || 0);
+    } else {
+      const numbers = groupRows
+        .map(r => Number(r[valueColumn]))
+        .filter(n => !isNaN(n));
+
+      if (mode === 'sum') value = _.sum(numbers);
+      else if (mode === 'avg') value = _.mean(numbers);
     }
 
     return { label: category, value };
   });
 
-  // 3. Limit to top 20 to prevent crashes
   const sorted = _.orderBy(processed, ['value'], ['desc']).slice(0, 20);
 
   return {
@@ -38,105 +45,125 @@ export const processAggregatedData = (
   };
 };
 
-// Scatter Plot logic with Churn coloring
+// Chuẩn bị dữ liệu cho biểu đồ scatter
 export const processScatterData = (
-  data: DataRow[], 
-  xKey: string, 
+  data: DataRow[],
+  xKey: string,
   yKey: string
 ) => {
-  // Identify Churn column (case-insensitive)
-  const churnKey = Object.keys(data[0] || {}).find(k => k.toLowerCase() === 'churn');
+  if (!xKey || !yKey) return [];
 
-  // Map to Chart.js format
-  const points = data.map(row => ({
-    x: Number(row[xKey]),
-    y: Number(row[yKey]),
-    // Store churn value in the point object for coloring logic in ChartDisplay
+  const churnKey = findChurnKey(data[0]);
+
+  return data.slice(0, 2000).map(row => ({
+    x: Number(row[xKey]) || 0,
+    y: Number(row[yKey]) || 0,
     churn: churnKey ? Number(row[churnKey]) : 0
   }));
-
-  // Limit points for performance (Scatter implies raw data, but 5000+ can lag)
-  return points.slice(0, 2000); 
 };
 
-// Stacked Bar: Group by Category, then Split by Churn
+// Xử lý dữ liệu churn cho biểu đồ stacked bar
 export const processStackedChurnData = (
   data: DataRow[],
-  groupByColumn: string
+  groupByColumn: string,
+  valueColumn?: string,
+  mode: AggregationMode = 'count'
 ) => {
-  const churnKey = Object.keys(data[0] || {}).find(k => k.toLowerCase() === 'churn');
-  if (!churnKey) return null;
+  const churnKey = findChurnKey(data[0]);
+  if (!churnKey || !groupByColumn) return null;
 
-  // Group by Category (e.g., MaritalStatus)
-  const grouped = _.groupBy(data, groupByColumn);
-  const labels = Object.keys(grouped).slice(0, 15); // Top 15 categories
+  // Gom dữ liệu theo cột phân nhóm
+  const grouped = _.groupBy(data, row => String(row[groupByColumn]));
+
+  // Lấy top 15 nhóm có số lượng lớn nhất
+  const labels = _.orderBy(
+    Object.keys(grouped),
+    key => grouped[key].length,
+    'desc'
+  ).slice(0, 15);
 
   const retainedData: number[] = [];
   const churnedData: number[] = [];
 
   labels.forEach(label => {
     const group = grouped[label];
-    // Count Churn=0
-    retainedData.push(group.filter(r => Number(r[churnKey]) === 0).length);
-    // Count Churn=1
-    churnedData.push(group.filter(r => Number(r[churnKey]) === 1).length);
+    const churnGroup = group.filter(r => Number(r[churnKey]) === 1);
+    const retainedGroup = group.filter(r => Number(r[churnKey]) === 0);
+
+    // Tính giá trị theo mode đã chọn
+    const calculateValue = (rows: DataRow[]) => {
+      if (mode === 'count' || !valueColumn) return rows.length;
+
+      const values = rows.map(r => Number(r[valueColumn]) || 0);
+      if (mode === 'sum') return _.sum(values);
+      if (mode === 'avg') return values.length ? _.mean(values) : 0;
+      return 0;
+    };
+
+    churnedData.push(calculateValue(churnGroup));
+    retainedData.push(calculateValue(retainedGroup));
   });
+
+  // Tạo nhãn hiển thị cho legend
+  const labelPrefix =
+    mode === 'count' ? 'Số lượng' : mode === 'sum' ? 'Tổng' : 'TB';
+  const valueLabel = valueColumn ? `(${valueColumn})` : '';
 
   return {
     labels,
     datasets: [
       {
-        label: 'Retained (Churn=0)',
+        label: `Ở lại - ${labelPrefix} ${valueLabel}`,
         data: retainedData,
-        backgroundColor: 'rgba(54, 162, 235, 0.8)', // Blue
+        backgroundColor: 'rgba(75, 192, 192, 0.7)',
       },
       {
-        label: 'Churned (Churn=1)',
+        label: `Rời bỏ - ${labelPrefix} ${valueLabel}`,
         data: churnedData,
-        backgroundColor: 'rgba(255, 99, 132, 0.8)', // Red
+        backgroundColor: 'rgba(255, 99, 132, 0.8)',
       }
     ]
   };
 };
 
-// Radar Chart: Customer Profile Comparison
+// Tạo dữ liệu hồ sơ hành vi cho biểu đồ radar
 export const processRadarProfileData = (data: DataRow[]) => {
-  const churnKey = Object.keys(data[0] || {}).find(k => k.toLowerCase() === 'churn');
+  const churnKey = findChurnKey(data[0]);
   if (!churnKey) return null;
 
-  // Fixed metrics of interest
-  const metrics = [
-    'SatisfactionScore', 
-    'HourSpendOnApp', 
-    'NumberOfDeviceRegistered', 
-    'NumberOfAddress', 
-    'Complain'
+  const targetMetrics = [
+    'SatisfactionScore',
+    'HourSpendOnApp',
+    'NumberOfDeviceRegistered',
+    'OrderCount',
+    'Tenure'
   ];
 
-  // Validate metrics exist in dataset
-  const availableMetrics = metrics.filter(m => Object.keys(data[0]).includes(m));
+  const availableMetrics = targetMetrics.filter(m =>
+    Object.keys(data[0]).includes(m)
+  );
+  if (availableMetrics.length < 3) return null;
 
-  // Split Data
   const retained = data.filter(r => Number(r[churnKey]) === 0);
   const churned = data.filter(r => Number(r[churnKey]) === 1);
 
-  // Calculate Means
-  const retainedMeans = availableMetrics.map(m => _.meanBy(retained, r => Number(r[m]) || 0));
-  const churnedMeans = availableMetrics.map(m => _.meanBy(churned, r => Number(r[m]) || 0));
+  // Tính giá trị trung bình cho từng chỉ số
+  const calcMean = (dataset: DataRow[], key: string) =>
+    _.meanBy(dataset, r => Number(r[key]) || 0);
 
   return {
     labels: availableMetrics,
     datasets: [
       {
-        label: 'Retained Customers',
-        data: retainedMeans,
+        label: 'Khách hàng trung thành',
+        data: availableMetrics.map(m => calcMean(retained, m)),
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
         borderColor: 'rgba(54, 162, 235, 1)',
         pointBackgroundColor: 'rgba(54, 162, 235, 1)',
       },
       {
-        label: 'Churned Customers',
-        data: churnedMeans,
+        label: 'Khách hàng rời bỏ',
+        data: availableMetrics.map(m => calcMean(churned, m)),
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         borderColor: 'rgba(255, 99, 132, 1)',
         pointBackgroundColor: 'rgba(255, 99, 132, 1)',

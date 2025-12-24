@@ -1,5 +1,5 @@
 {
-  "name": "DataViz Studio",
-  "description": "A powerful, client-side data visualization tool. Upload CSV files and instantly generate interactive charts using React and Recharts.",
+  "name": "Phân tích & Dự đoán tỉ lệ Rời bỏ của Khách hàng",
+  "description": "Phân tích & Dự đoán tỉ lệ Rời bỏ của Khách hàng",
   "requestFramePermissions": []
 }
