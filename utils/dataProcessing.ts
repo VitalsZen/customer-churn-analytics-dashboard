@@ -132,11 +132,11 @@ export const processRadarProfileData = (data: DataRow[]) => {
   if (!churnKey) return null;
 
   const targetMetrics = [
-    'SatisfactionScore',
-    'HourSpendOnApp',
-    'NumberOfDeviceRegistered',
-    'OrderCount',
-    'Tenure'
+    'Tenure',
+    'WarehouseToHome',
+    'DaySinceLastOrder',
+    'DevicePerTenure',
+    'SatisfactionScore'
   ];
 
   const availableMetrics = targetMetrics.filter(m =>
