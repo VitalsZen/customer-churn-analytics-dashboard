@@ -1,96 +1,63 @@
-
 # Đồ án: Phân tích và Dự đoán Khả năng Rời bỏ của Khách hàng trong Thương mại Điện tử
 
-**Trường:** Đại học Công nghệ Thông tin - ĐHQG TPHCM  
-**Khoa:** Khoa học và Kỹ thuật Thông tin  
+**Trường:** Đại học Công nghệ Thông tin - ĐHQG TPHCM
+
+**Khoa:** Khoa học và Kỹ thuật Thông tin
+
 **Môn học:** Phân tích và Trực quan dữ liệu (IE313.Q11)
 
+---
 
 ### **1.  Giới thiệu**
 
 Đồ án này thực hiện một quy trình khoa học dữ liệu toàn diện nhằm giải quyết bài toán **dự đoán khả năng rời bỏ của khách hàng (Customer Churn)** trong lĩnh vực thương mại điện tử. Việc giữ chân khách hàng là yếu tố sống còn đối với các doanh nghiệp, và khả năng dự đoán sớm các khách hàng có nguy cơ rời bỏ cho phép doanh nghiệp triển khai các chiến lược can thiệp chủ động và hiệu quả.
 
-Dự án sử dụng bộ dữ liệu _"Ecommerce Customer Churn Analysis and Prediction"_ từ Kaggle, áp dụng các kỹ thuật từ tiền xử lý, phân tích dữ liệu khám phá (EDA), kỹ thuật đặc trưng, đến xây dựng và so sánh **8 mô hình học máy** khác nhau. Kết quả cuối cùng không chỉ là một mô hình dự đoán có độ chính xác cao mà còn là một **hệ thống dashboard tương tác** và **sản phẩm demo**, giúp chuyển hóa dữ liệu thành các insight kinh doanh có giá trị.
+Dự án sử dụng bộ dữ liệu *"Ecommerce Customer Churn Analysis and Prediction"* từ Kaggle, áp dụng các kỹ thuật từ tiền xử lý, phân tích dữ liệu khám phá (EDA), kỹ thuật đặc trưng, đến xây dựng và so sánh **8 mô hình học máy** khác nhau.
 
-### **2.  Mục tiêu của Đồ án**
+**Lưu ý:** Repository này chứa **Source Code của ứng dụng Web Demo** - sản phẩm giúp người dùng cuối tương tác và trực quan hóa dữ liệu từ đồ án này.
 
-Đồ án này được thực hiện nhằm đạt được ba mục tiêu chính:
+### **2.  Mục tiêu của Ứng dụng Web**
 
-*   **Phân tích và xác định** các yếu tố chính ảnh hưởng đến quyết định rời bỏ của khách hàng.
-*   **Xây dựng và so sánh** các mô hình học máy để lựa chọn ra mô hình có hiệu suất dự đoán tốt nhất.
-*   **Đề xuất các giải pháp kinh doanh** khả thi dựa trên những insight đã phân tích để giảm tỷ lệ Churn.
+Ứng dụng web này (Web Demo) được xây dựng nhằm hiện thực hóa các kết quả phân tích thành công cụ thực tế, phục vụ các mục tiêu:
 
-### **3.  Cấu trúc Thư mục**
+* **Trực quan hóa tương tác:** Cung cấp giao diện cho phép người dùng (Admin/Manager) tải lên dữ liệu mới và xem các biểu đồ phân tích tức thì.
+* **Trải nghiệm người dùng:** Demo khả năng tích hợp Data Science vào một sản phẩm phần mềm hiện đại, thân thiện với người dùng.
+* **Báo cáo động:** Thay thế các báo cáo tĩnh bằng Dashboard có khả năng filter và drill-down dữ liệu.
 
-Dự án được tổ chức theo cấu trúc sau để đảm bảo tính rõ ràng và khả năng tái sử dụng:
+### **3.  Công nghệ sử dụng**
 
-```
-.
-├── 1.Dataset/       # Chứa dữ liệu thô và dữ liệu đã được làm sạch (.csv)
-├── 2.Preprocessing/ # Chứa notebook cho quá trình tiền xử lý dữ liệu
-├── 3.EDA/           # Chứa notebook cho quá trình phân tích dữ liệu khám phá
-├── 4.Visualization/ # Chứa các sản phẩm trực quan hóa (file .pbix, link Flourish, source code & link website)
-├── 5.Modeling/      # Chứa notebook cho quá trình xây dựng và đánh giá mô hình
-├── 6.Report/        # Chứa file báo cáo cuối kỳ của đồ án
-└── README.md        # File mô tả tổng quan về dự án
-```
+Ứng dụng được xây dựng dựa trên nền tảng Web hiện đại để đảm bảo hiệu năng và trải nghiệm tốt nhất:
+
+* **Frontend Framework:** React
+* **Language:** TypeScript (đảm bảo tính chặt chẽ của dữ liệu)
+* **Build Tool:** Vite (tối ưu tốc độ dev và build)
+* **Visualization Library:** Recharts / Chart.js (để vẽ biểu đồ phân tích)
+* **Deployment:** Vercel
+
+### **4.  Tính năng chính (Web Demo)**
+
+1. **Upload CSV:** Cho phép người dùng tải lên file dữ liệu khách hàng (theo định dạng chuẩn của dataset).
+2. **Dashboard Analytics:** Tự động sinh ra các biểu đồ phân tích (EDA) ngay sau khi dữ liệu được tải lên.
+3. **Responsive Design:** Tương thích tốt trên cả máy tính và thiết bị di động.
 
 
-### **4.  Quy trình Thực hiện**
+### **5.  Demo & Tài liệu liên quan**
 
-#### **4.1. Tiền xử lý Dữ liệu**
+* **Live Website:** **[Truy cập Web Demo tại đây](https://pttqdl-webdemo.vercel.app/)**
+* **Data Story:** **[Xem câu chuyện dữ liệu trên Flourish](https://public.flourish.studio/story/3520181/)**
+* **Báo cáo chi tiết & Notebook:** (Liên hệ tác giả để truy cập tài liệu nghiên cứu gốc)
 
-*   **Làm sạch dữ liệu không nhất quán:** Chuẩn hóa các giá trị hạng mục (ví dụ: "Phone" và "Mobile Phone").
-*   **Xử lý giá trị thiếu:** Áp dụng các chiến lược điền dữ liệu phù hợp với từng biến (trung vị, điền có điều kiện).
-*   **Xử lý ngoại lai:** Sử dụng phương pháp **IQR** và kỹ thuật **capping** để xử lý các giá trị bất thường.
+### **6.  Thông tin liên lạc**
 
-#### **4.2. Phân tích Dữ liệu Khám phá (EDA)**
-
-*   Thực hiện **phân tích đơn biến và đa biến** để tìm ra các xu hướng, mẫu và insight quan trọng liên quan đến hành vi rời bỏ.
-*   Các kết quả phân tích được trực quan hóa bằng hệ thống **dashboard trên Power BI**.
-
-#### **4.3. Kỹ thuật & Lựa chọn Đặc trưng**
-
-*   **Tạo đặc trưng mới:** Xây dựng biến `DevicePerTenure` để đo lường tốc độ tiếp nhận công nghệ của khách hàng.
-*   **Lựa chọn đặc trưng:** Sử dụng kết hợp **Ma trận tương quan**, **Kiểm định Chi-squared** và hệ số **Cramér's V** để loại bỏ 5 cột không cần thiết, nhằm giảm đa cộng tuyến và nhiễu.
-
-#### **4.4. Xây dựng Mô hình**
-
-*   **Xây dựng và so sánh 8 mô hình khác nhau:** Logistic Regression, KNN, SVM, Random Forest, Gradient Boosting, **XGBoost**, **LightGBM**, và MLP.
-*   Sử dụng **Pipeline** để tự động hóa quy trình chuẩn hóa (`StandardScaler`) và mã hóa (`OneHotEncoder`).
-*   Áp dụng các kỹ thuật xử lý dữ liệu mất cân bằng: `class_weight` và **SMOTE**.
-*   Đánh giá mô hình một cách khách quan bằng **Kiểm định chéo phân tầng 10 lần** (10-fold Stratified Cross-Validation).
-
-#### **4.5. Đánh giá Mô hình**
-
-*   Sử dụng các độ đo toàn diện: `Accuracy`, `ROC-AUC`, và đặc biệt tập trung vào **`F1-Score`**, **`Precision`**, **`Recall`** cho lớp Churn (C1) để đánh giá hiệu quả kinh doanh.
+* **Giảng viên hướng dẫn:** ThS. Phạm Nguyễn Phúc Toàn - `toanpnp@uit.edu.vn`
+* **Thành viên nhóm:**
+* Phạm Huỳnh Tấn Khang - `22520624@gm.uit.edu.vn`
+* Huỳnh Ngọc Trang - `22521510@gm.uit.edu.vn`
+* Nguyễn Huỳnh Xuân Nghi - `23521004@gm.uit.edu.vn`
+* Nguyễn Thị Ngọc Phước - `23521235@gm.uit.edu.vn`
 
 
 
-### **5.  Kết quả nổi bật**
+---
 
- **Insight chính từ EDA:** Tỷ lệ rời bỏ cao đột biến ở nhóm khách hàng mới (0-6 tháng), nhóm mua ngành hàng "Thời trang", và đặc biệt là nhóm có khiếu nại.
-
- **Mô hình Tốt nhất: XGBoost** được xác định là mô hình hiệu quả nhất.
-
-**Hiệu suất của XGBoost:**
-
-*   **Accuracy:** `0.99`
-*   **F1-Score (lớp Churn):** `0.96`
-*   **Recall (lớp Churn):** `0.95`
-*   **AUC:** `0.995`
-
-### **6.  Sản phẩm Trực quan hóa**
-
-*   **Power BI Dashboard:** Một hệ thống gồm **5 trang báo cáo tương tác**, cung cấp cái nhìn 360 độ về bài toán Churn, từ tổng quan điều hành đến phân tích hiệu suất mô hình.
-*   [**Flourish Data Story:**](https://public.flourish.studio/story/3520181/) Một câu chuyện dữ liệu kể về "hành trình rời bỏ" của khách hàng, sử dụng các biểu đồ ấn tượng như **Parliament Chart** và **Sankey Diagram**.
-*   [**Website Demo:**](https://pttqdl-webdemo.vercel.app/) Một ứng dụng web (xây dựng bằng **React & TypeScript**) cho phép người dùng tự tải lên file CSV và tạo các biểu đồ phân tích một cách linh hoạt.
-
-### **7.  Thông tin liên lạc**
-
-*   **Giảng viên hướng dẫn:** ThS. Phạm Nguyễn Phúc Toàn - `toanpnp@uit.edu.vn`
-*   **Thành viên nhóm:**
-    *   Phạm Huỳnh Tấn Khang - `22520624@gm.uit.edu.vn`
-    *   Huỳnh Ngọc Trang - `22521510@gm.uit.edu.vn`
-    *   Nguyễn Huỳnh Xuân Nghi - `23521004@gm.uit.edu.vn`
-    *   Nguyễn Thị Ngọc Phước - `23521235@gm.uit.edu.vn`
+*© 2025 - Đồ án môn học Phân tích và Trực quan dữ liệu - UIT*
