@@ -49,15 +49,15 @@ Dự án sử dụng bộ dữ liệu *"Ecommerce Customer Churn Analysis and Pr
 
 ### **6.  Thông tin liên lạc**
 
-* **Giảng viên hướng dẫn:** ThS. Phạm Nguyễn Phúc Toàn - `toanpnp@uit.edu.vn`
-* **Thành viên nhóm:**
-* Phạm Huỳnh Tấn Khang - `22520624@gm.uit.edu.vn`
-* Huỳnh Ngọc Trang - `22521510@gm.uit.edu.vn`
-* Nguyễn Huỳnh Xuân Nghi - `23521004@gm.uit.edu.vn`
-* Nguyễn Thị Ngọc Phước - `23521235@gm.uit.edu.vn`
+**Giảng viên hướng dẫn:** ThS. Phạm Nguyễn Phúc Toàn - `toanpnp@uit.edu.vn`
 
-
+**Thành viên nhóm:**
+  * Phạm Huỳnh Tấn Khang - `22520624@gm.uit.edu.vn`
+  * Huỳnh Ngọc Trang - `22521510@gm.uit.edu.vn`
+  * Nguyễn Huỳnh Xuân Nghi - `23521004@gm.uit.edu.vn`
+  * Nguyễn Thị Ngọc Phước - `23521235@gm.uit.edu.vn`
 
 ---
 
 *© 2025 - Đồ án môn học Phân tích và Trực quan dữ liệu - UIT*
+
