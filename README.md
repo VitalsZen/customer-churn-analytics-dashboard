@@ -14,7 +14,6 @@
 
 Dự án sử dụng bộ dữ liệu *"Ecommerce Customer Churn Analysis and Prediction"* từ Kaggle, áp dụng các kỹ thuật từ tiền xử lý, phân tích dữ liệu khám phá (EDA), kỹ thuật đặc trưng, đến xây dựng và so sánh **8 mô hình học máy** khác nhau.
 
-**Lưu ý:** Repository này chứa **Source Code của ứng dụng Web Demo** - sản phẩm giúp người dùng cuối tương tác và trực quan hóa dữ liệu từ đồ án này.
 
 ### **2.  Mục tiêu của Ứng dụng Web**
 
@@ -60,4 +59,5 @@ Dự án sử dụng bộ dữ liệu *"Ecommerce Customer Churn Analysis and Pr
 ---
 
 *© 2025 - Đồ án môn học Phân tích và Trực quan dữ liệu - UIT*
+
 
