@@ -28,9 +28,9 @@ Dự án sử dụng bộ dữ liệu *"Ecommerce Customer Churn Analysis and Pr
 Ứng dụng được xây dựng dựa trên nền tảng Web hiện đại để đảm bảo hiệu năng và trải nghiệm tốt nhất:
 
 * **Frontend Framework:** React
-* **Language:** TypeScript (đảm bảo tính chặt chẽ của dữ liệu)
-* **Build Tool:** Vite (tối ưu tốc độ dev và build)
-* **Visualization Library:** Recharts / Chart.js (để vẽ biểu đồ phân tích)
+* **Language:** TypeScript
+* **Build Tool:** Vite 
+* **Visualization Library:** Recharts / Chart.js
 * **Deployment:** Vercel
 
 ### **4.  Tính năng chính (Web Demo)**
@@ -59,5 +59,6 @@ Dự án sử dụng bộ dữ liệu *"Ecommerce Customer Churn Analysis and Pr
 ---
 
 *© 2025 - Đồ án môn học Phân tích và Trực quan dữ liệu - UIT*
+
 
 
